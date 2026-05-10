@@ -1,0 +1,9 @@
+{
+  "id": "agentic-line-refs",
+  "name": "Agentic Line Refs",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Copy a citation with file link, line numbers, and a custom prompt for AI agents.",
+  "author": "imavinash",
+  "isDesktopOnly": false
+}
