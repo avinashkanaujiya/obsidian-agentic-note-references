@@ -14,15 +14,31 @@ An Obsidian plugin that copies a citation with file link, line numbers, and a cu
    Here is the referenced section:
    ```
 
+   When only a single line is selected:
+
+   ```
+   [[My Note]] — Line 5
+
+   Here is the referenced section:
+   ```
+
 4. Paste it into your agent chat. The agent knows exactly which file and lines you mean.
 
 ## Customizing the citation
 
-Go to **Settings → Agentic Note References** to edit the citation template.
+Go to **Settings → Agentic Note References** to edit the citation template and path format.
 
-Available placeholders:
+### Path format
 
-- `{{filename}}` — basename of the note (e.g. `My Note`)
+Choose how the file is referenced in the citation:
+
+- **File name only** (default) — e.g. `My Note`
+- **Relative to vault root** — e.g. `folder/My Note.md`
+- **Absolute filesystem path** — e.g. `/home/user/vault/folder/My Note.md`
+
+### Template placeholders
+
+- `{{filename}}` — the file reference, according to your **Path format** setting
 - `{{from}}` — starting line number (1-indexed)
 - `{{to}}` — ending line number (1-indexed)
 - `{{lines}}` — human-friendly line range (e.g. `Line 5` or `Lines 47–52`)
@@ -31,6 +47,6 @@ Use `\n` for explicit newlines in the template.
 
 ## Installation
 
-1. Clone or download this repo into your vault's `.obsidian/plugins/agentic-line-refs/` folder.
+1. Clone or download this repo into your vault's `.obsidian/plugins/agentic-note-references/` folder.
 2. Run `npm install && npm run build`.
 3. Enable **Agentic Note References** in Obsidian's Community Plugins settings.
