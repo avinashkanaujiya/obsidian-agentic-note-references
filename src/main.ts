@@ -1,12 +1,12 @@
 import { Editor, MarkdownView, Notice, Plugin } from "obsidian";
 import {
-	AgenticLineRefsSettingTab,
+	AgenticNoteReferencesSettingTab,
 	DEFAULT_SETTINGS,
-	type AgenticLineRefsSettings,
+	type AgenticNoteReferencesSettings,
 } from "./settings";
 
-export default class AgenticLineRefsPlugin extends Plugin {
-	settings: AgenticLineRefsSettings;
+export default class AgenticNoteReferencesPlugin extends Plugin {
+	settings: AgenticNoteReferencesSettings;
 
 	async onload() {
 		await this.loadSettings();
@@ -25,7 +25,7 @@ export default class AgenticLineRefsPlugin extends Plugin {
 			],
 		});
 
-		this.addSettingTab(new AgenticLineRefsSettingTab(this.app, this));
+		this.addSettingTab(new AgenticNoteReferencesSettingTab(this.app, this));
 	}
 
 	async copyCitation(editor: Editor, view: MarkdownView) {

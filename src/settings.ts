@@ -1,22 +1,22 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import type AgenticLineRefsPlugin from "./main";
+import type AgenticNoteReferencesPlugin from "./main";
 
 export type PathFormat = "filename" | "vaultRelative" | "absolute";
 
-export interface AgenticLineRefsSettings {
+export interface AgenticNoteReferencesSettings {
 	template: string;
 	pathFormat: PathFormat;
 }
 
-export const DEFAULT_SETTINGS: AgenticLineRefsSettings = {
+export const DEFAULT_SETTINGS: AgenticNoteReferencesSettings = {
 	template: "[[{{filename}}]] — Lines {{from}}–{{to}}\n\nHere is the referenced section:",
 	pathFormat: "filename",
 };
 
-export class AgenticLineRefsSettingTab extends PluginSettingTab {
-	plugin: AgenticLineRefsPlugin;
+export class AgenticNoteReferencesSettingTab extends PluginSettingTab {
+	plugin: AgenticNoteReferencesPlugin;
 
-	constructor(app: App, plugin: AgenticLineRefsPlugin) {
+	constructor(app: App, plugin: AgenticNoteReferencesPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
