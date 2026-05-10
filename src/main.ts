@@ -42,7 +42,19 @@ export default class AgenticLineRefsPlugin extends Plugin {
 		const fromLine = fromCursor.line + 1;
 		const toLine = toCursor.line + 1;
 
-		const filename = file.basename;
+		let filename: string;
+		switch (this.settings.pathFormat) {
+			case "vaultRelative":
+				filename = file.path;
+				break;
+			case "absolute":
+				filename = file.vault.adapter.getFullPath(file.path);
+				break;
+			case "filename":
+			default:
+				filename = file.basename;
+				break;
+		}
 		const linesText =
 			fromLine === toLine
 				? `Line ${fromLine}`

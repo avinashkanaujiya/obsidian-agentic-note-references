@@ -1,12 +1,16 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import type AgenticLineRefsPlugin from "./main";
 
+export type PathFormat = "filename" | "vaultRelative" | "absolute";
+
 export interface AgenticLineRefsSettings {
 	template: string;
+	pathFormat: PathFormat;
 }
 
 export const DEFAULT_SETTINGS: AgenticLineRefsSettings = {
 	template: "[[{{filename}}]] — Lines {{from}}–{{to}}\n\nHere is the referenced section:",
+	pathFormat: "filename",
 };
 
 export class AgenticLineRefsSettingTab extends PluginSettingTab {
@@ -20,6 +24,21 @@ export class AgenticLineRefsSettingTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
+
+		new Setting(containerEl)
+			.setName("Path format")
+			.setDesc("Choose how the file path is inserted into the citation.")
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOption("filename", "File name only")
+					.addOption("vaultRelative", "Relative to vault root")
+					.addOption("absolute", "Absolute filesystem path")
+					.setValue(this.plugin.settings.pathFormat)
+					.onChange(async (value) => {
+						this.plugin.settings.pathFormat = value as PathFormat;
+						await this.plugin.saveSettings();
+					})
+			);
 
 		new Setting(containerEl)
 			.setName("Citation template")
