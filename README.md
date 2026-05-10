@@ -1,4 +1,4 @@
-# Agentic Line Refs
+# Agentic Note References
 
 An Obsidian plugin that copies a citation with file link, line numbers, and a custom prompt — ready to paste into any AI agent chat.
 
@@ -18,7 +18,7 @@ An Obsidian plugin that copies a citation with file link, line numbers, and a cu
 
 ## Customizing the citation
 
-Go to **Settings → Agentic Line Refs** to edit the citation template.
+Go to **Settings → Agentic Note References** to edit the citation template.
 
 Available placeholders:
 
@@ -33,4 +33,4 @@ Use `\n` for explicit newlines in the template.
 
 1. Clone or download this repo into your vault's `.obsidian/plugins/agentic-line-refs/` folder.
 2. Run `npm install && npm run build`.
-3. Enable **Agentic Line Refs** in Obsidian's Community Plugins settings.
+3. Enable **Agentic Note References** in Obsidian's Community Plugins settings.

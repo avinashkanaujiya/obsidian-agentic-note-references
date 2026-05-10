@@ -75,7 +75,7 @@ export default class AgenticLineRefsPlugin extends Plugin {
 			new Notice("Agentic citation copied to clipboard.");
 		} catch (err) {
 			new Notice("Failed to copy citation to clipboard.");
-			console.error("Agentic Line Refs: clipboard write failed", err);
+			console.error("Agentic Note References: clipboard write failed", err);
 		}
 	}
 

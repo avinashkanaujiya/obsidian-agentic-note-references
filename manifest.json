@@ -1,6 +1,6 @@
 {
   "id": "agentic-line-refs",
-  "name": "Agentic Line Refs",
+  "name": "Agentic Note References",
   "version": "1.1.0",
   "minAppVersion": "0.15.0",
   "description": "Copy a citation with file link, line numbers, and a custom prompt for AI agents.",

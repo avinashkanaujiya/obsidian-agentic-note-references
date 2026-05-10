@@ -1,5 +1,5 @@
 {
-  "name": "obsidian-agentic-line-refs",
+  "name": "obsidian-agentic-note-references",
   "version": "1.0.0",
   "description": "Copy a citation with file link, line numbers, and a custom prompt for AI agents.",
   "main": "main.js",
