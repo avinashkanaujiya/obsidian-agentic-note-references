@@ -47,9 +47,12 @@ export default class AgenticLineRefsPlugin extends Plugin {
 			case "vaultRelative":
 				filename = file.path;
 				break;
-			case "absolute":
-				filename = file.vault.adapter.getFullPath(file.path);
+			case "absolute": {
+				const adapter = file.vault.adapter as any;
+				const basePath = adapter.basePath ?? "";
+				filename = basePath ? `${basePath}/${file.path}` : file.path;
 				break;
+			}
 			case "filename":
 			default:
 				filename = file.basename;
