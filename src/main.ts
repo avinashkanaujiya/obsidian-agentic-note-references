@@ -113,19 +113,11 @@ export default class AgenticNoteReferencesPlugin extends Plugin {
 		const fromLine = editor.getCursor("from").line + 1;
 		const toLine = editor.getCursor("to").line + 1;
 
-		const builtinModes: RefModeItem[] = [
-			{
-				name: "Reference Note",
-				template: "[[{{filename}}]]",
-			},
+		const allModes: RefModeItem[] = [
 			{
 				name: "Default",
 				template: this.settings.template,
 			},
-		];
-
-		const allModes: RefModeItem[] = [
-			...builtinModes,
 			...this.settings.customRefModes.map((m) => ({
 				name: m.name,
 				template: m.template,

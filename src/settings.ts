@@ -125,8 +125,12 @@ export class AgenticNoteReferencesSettingTab extends PluginSettingTab {
 	}
 
 	private renderRefModes(containerEl: HTMLElement): void {
-		for (const mode of this.plugin.settings.customRefModes) {
-			// Name row — includes the delete button on the right
+		const modes = this.plugin.settings.customRefModes;
+
+		for (let i = 0; i < modes.length; i++) {
+			const mode = modes[i];
+
+			// Name row — reorder + delete buttons on the right
 			new Setting(containerEl)
 				.setName("Name")
 				.addText((text) =>
@@ -140,13 +144,33 @@ export class AgenticNoteReferencesSettingTab extends PluginSettingTab {
 				)
 				.addExtraButton((btn) =>
 					btn
+						.setIcon("arrow-up")
+						.setTooltip("Move up")
+						.setDisabled(i === 0)
+						.onClick(async () => {
+							[modes[i - 1], modes[i]] = [modes[i], modes[i - 1]];
+							await this.plugin.saveSettings();
+							this.display();
+						}),
+				)
+				.addExtraButton((btn) =>
+					btn
+						.setIcon("arrow-down")
+						.setTooltip("Move down")
+						.setDisabled(i === modes.length - 1)
+						.onClick(async () => {
+							[modes[i], modes[i + 1]] = [modes[i + 1], modes[i]];
+							await this.plugin.saveSettings();
+							this.display();
+						}),
+				)
+				.addExtraButton((btn) =>
+					btn
 						.setIcon("trash")
 						.setTooltip("Delete this ref mode")
 						.onClick(async () => {
 							this.plugin.settings.customRefModes =
-								this.plugin.settings.customRefModes.filter(
-									(m) => m.id !== mode.id,
-								);
+								modes.filter((m) => m.id !== mode.id);
 							await this.plugin.saveSettings();
 							this.display();
 						}),

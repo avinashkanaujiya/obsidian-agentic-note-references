@@ -1,32 +1,29 @@
 # Agentic Note References
 
-An Obsidian plugin that copies a citation with file link, line numbers, and a custom prompt — ready to paste into any AI agent chat.
+An Obsidian plugin that copies a formatted note reference to the clipboard — ready to paste into any AI agent chat.
 
 ## How it works
 
-### Editor mode
+### Editor mode (Live Preview / Source)
 
-1. Place your cursor (or select a range) in any note.
+1. Place your cursor on a line, or select a range of lines.
 2. Press **Ctrl+Alt+I** (or run *Copy agentic citation* from the command palette).
-3. A picker appears listing all available ref modes:
+3. A picker appears — type to filter, arrow keys or mouse to choose:
 
-   | Mode | What gets copied |
-   |------|-----------------|
-   | **Reference Note** | Just the file link, e.g. `[[My Note]]` |
-   | **Default** | File link + line range + prompt (configurable) |
-   | *Custom modes* | Whatever you define in Settings |
+   - **Default** — built-in; uses the Default citation template from Settings
+   - *Custom modes* — any modes you define in Settings, in the order you set
 
-4. Select a mode and the citation is copied to the clipboard.
+4. The formatted citation is copied to the clipboard.
 
 ### Reading mode
 
-Press **Ctrl+Alt+I** while in Reading mode. The note reference is copied directly — no picker, no line numbers:
+Press **Ctrl+Alt+I** while in Reading mode. The note reference is copied directly — no picker, no line numbers.
 
-```
-[[My Note]]
-```
+Default output: `[[My Note]]`
 
-The reading mode template is configurable in Settings.
+The template is configurable (see [Reading mode template](#reading-mode-template) below).
+
+---
 
 ## Settings
 
@@ -34,17 +31,19 @@ Go to **Settings → Agentic Note References**.
 
 ### Path format
 
-Applies to all modes and both reading/editor mode:
+Controls how `{{filename}}` resolves in every template:
 
-- **File name only** (default) — `My Note`
-- **Relative to vault root** — `folder/My Note.md`
-- **Absolute filesystem path** — `/home/user/vault/folder/My Note.md`
+| Option | Example |
+|--------|---------|
+| File name only *(default)* | `My Note` |
+| Relative to vault root | `folder/My Note.md` |
+| Absolute filesystem path | `/home/user/vault/folder/My Note.md` |
 
 ### Editor mode — Default citation template
 
-Template used by the built-in **Default** mode in the editor picker.
+The template used by the built-in **Default** mode in the picker.
 
-Default:
+Default value:
 ```
 [[{{filename}}]] — Lines {{from}}–{{to}}
 
@@ -53,27 +52,58 @@ Here is the referenced section:
 
 ### Reading mode template
 
-Template used when Ctrl+Alt+I is pressed in Reading mode.
+The template used when Ctrl+Alt+I is pressed in Reading mode.
 
-Default: `[[{{filename}}]]`
+Default value: `[[{{filename}}]]`
 
 ### Custom ref modes
 
-Add as many ref modes as you like. Each mode has a **name** (shown in the picker) and a **template**.
+Click **Add ref mode** to create a new mode. Each mode has:
 
-#### Template placeholders
+- **Name** — shown in the picker list
+- **Template** — the text that gets copied
 
-| Placeholder | Description | Available in |
-|-------------|-------------|-------------|
+Use the **↑ / ↓** buttons to reorder modes. Their order in Settings is the order they appear in the picker, below the built-in **Default**.
+
+### Template placeholders
+
+| Placeholder | Expands to | Available in |
+|-------------|------------|--------------|
 | `{{filename}}` | File reference per path format | All modes |
-| `{{from}}` | Starting line number (1-indexed) | Editor mode only |
-| `{{to}}` | Ending line number (1-indexed) | Editor mode only |
-| `{{lines}}` | Human-friendly range, e.g. `Line 5` or `Lines 3–7` | Editor mode only |
+| `{{from}}` | Starting line number (1-indexed) | Editor modes only |
+| `{{to}}` | Ending line number (1-indexed) | Editor modes only |
+| `{{lines}}` | `Line 5` or `Lines 3–7` | Editor modes only |
 
-Use `\n` for explicit newlines in templates.
+In Reading mode, `{{from}}`, `{{to}}`, and `{{lines}}` are not available — use only `{{filename}}`.
+
+Use `\n` for explicit newlines in any template.
+
+---
 
 ## Installation
 
-1. Clone or download this repo into your vault's `.obsidian/plugins/agentic-note-references/` folder.
-2. Run `npm install && npm run build`.
-3. Enable **Agentic Note References** in Obsidian's Community Plugins settings.
+```bash
+git clone <repo> ~/.obsidian/plugins/agentic-note-references
+cd ~/.obsidian/plugins/agentic-note-references
+npm install && npm run build
+```
+
+Enable **Agentic Note References** in **Settings → Community Plugins**.
+
+## Development
+
+Build and sync to your vault in one step:
+
+```bash
+./sync.sh
+```
+
+Options:
+
+```
+-n, --no-build      Skip npm build (copy existing main.js)
+-v, --vault <path>  Target vault root  (default: ~/obsidian/notes)
+-s, --src   <path>  Plugin source dir  (default: ~/github/obsidian-agentic-note-references)
+```
+
+After syncing, reload the plugin in Obsidian: **Settings → Community Plugins → toggle off/on**.

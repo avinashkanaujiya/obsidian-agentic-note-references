@@ -33,7 +33,6 @@ export class RefModeSuggestModal extends SuggestModal<RefModeItem> {
 
 	renderSuggestion(item: RefModeItem, el: HTMLElement): void {
 		el.createEl("div", { text: item.name, cls: "suggestion-title" });
-		el.createEl("small", { text: item.template, cls: "suggestion-note" });
 	}
 
 	onChooseSuggestion(item: RefModeItem): void {
