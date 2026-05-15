@@ -1,25 +1,32 @@
-import { Editor, MarkdownView, Notice, Plugin } from "obsidian";
+import { Editor, FileSystemAdapter, MarkdownFileInfo, MarkdownView, Notice, Plugin } from "obsidian";
 import {
 	AgenticNoteReferencesSettingTab,
 	DEFAULT_SETTINGS,
 	type AgenticNoteReferencesSettings,
 } from "./settings";
+import { buildCitation } from "./citation";
 
 export default class AgenticNoteReferencesPlugin extends Plugin {
-	settings: AgenticNoteReferencesSettings;
+	// Assigned in onload() via loadSettings(); definitely present before any
+	// command or setting handler can run.
+	settings!: AgenticNoteReferencesSettings;
 
 	async onload() {
 		await this.loadSettings();
+		console.log("Agentic Note References: loaded");
 
 		this.addCommand({
 			id: "copy-agentic-citation",
 			name: "Copy agentic citation",
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				this.copyCitation(editor, view);
+			// editorCallback is synchronous by Obsidian contract; the returned
+			// Promise is intentionally ignored — all errors are caught inside
+			// copyCitation and surfaced via Notice.
+			editorCallback: (editor: Editor, ctx: MarkdownView | MarkdownFileInfo) => {
+				void this.copyCitation(editor, ctx);
 			},
 			hotkeys: [
 				{
-					modifiers: ["Ctrl"],
+					modifiers: ["Ctrl", "Alt"],
 					key: "i",
 				},
 			],
@@ -28,8 +35,12 @@ export default class AgenticNoteReferencesPlugin extends Plugin {
 		this.addSettingTab(new AgenticNoteReferencesSettingTab(this.app, this));
 	}
 
-	async copyCitation(editor: Editor, view: MarkdownView) {
-		const file = view.file;
+	onUnload() {
+		console.log("Agentic Note References: unloaded");
+	}
+
+	async copyCitation(editor: Editor, ctx: MarkdownFileInfo) {
+		const file = ctx.file;
 		if (!file) {
 			new Notice("No active file.");
 			return;
@@ -48,8 +59,16 @@ export default class AgenticNoteReferencesPlugin extends Plugin {
 				filename = file.path;
 				break;
 			case "absolute": {
-				const adapter = file.vault.adapter as any;
-				const basePath = adapter.basePath ?? "";
+				const adapter = this.app.vault.adapter;
+				const basePath =
+					adapter instanceof FileSystemAdapter
+						? adapter.getBasePath()
+						: "";
+				if (!basePath) {
+					new Notice(
+						"Absolute path is unavailable on this platform — using vault-relative path.",
+					);
+				}
 				filename = basePath ? `${basePath}/${file.path}` : file.path;
 				break;
 			}
@@ -58,17 +77,13 @@ export default class AgenticNoteReferencesPlugin extends Plugin {
 				filename = file.basename;
 				break;
 		}
-		const linesText =
-			fromLine === toLine
-				? `Line ${fromLine}`
-				: `Lines ${fromLine}–${toLine}`;
 
-		const output = this.settings.template
-			.replace(/\{\{filename\}\}/g, filename)
-			.replace(/\{\{from\}\}/g, String(fromLine))
-			.replace(/\{\{to\}\}/g, String(toLine))
-			.replace(/\{\{lines\}\}/g, linesText)
-			.replace(/\\n/g, "\n");
+		const output = buildCitation(
+			this.settings.template,
+			filename,
+			fromLine,
+			toLine,
+		);
 
 		try {
 			await navigator.clipboard.writeText(output);
@@ -83,7 +98,7 @@ export default class AgenticNoteReferencesPlugin extends Plugin {
 		this.settings = Object.assign(
 			{},
 			DEFAULT_SETTINGS,
-			await this.loadData()
+			await this.loadData(),
 		);
 	}
 

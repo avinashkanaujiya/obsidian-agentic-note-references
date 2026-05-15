@@ -1,11 +1,12 @@
 {
   "name": "obsidian-agentic-note-references",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "description": "Copy a citation with file link, line numbers, and a custom prompt for AI agents.",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "test": "node --experimental-strip-types --test tests/citation.test.ts",
     "version": "node version-bump.mjs && git add manifest.json versions.json"
   },
   "keywords": [
@@ -13,13 +14,14 @@
     "plugin"
   ],
   "author": "imavinash",
+  "type": "module",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^16.11.6",
+    "@types/node": "20.19.41",
     "builtin-modules": "3.3.0",
     "esbuild": "0.17.3",
-    "obsidian": "latest",
+    "obsidian": "1.12.3",
     "tslib": "2.4.0",
-    "typescript": "4.7.4"
+    "typescript": "5.9.3"
   }
 }
