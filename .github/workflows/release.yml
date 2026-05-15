@@ -27,6 +27,16 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Verify versions are in sync
+        run: |
+          PKG=$(jq -r '.version' package.json)
+          MAN=$(jq -r '.version' manifest.json)
+          if [ "$PKG" != "$MAN" ]; then
+            echo "Version mismatch: package.json ($PKG) != manifest.json ($MAN)"
+            echo "Run 'npm version patch|minor|major' instead of editing files manually."
+            exit 1
+          fi
+
       - name: Read version from manifest
         id: manifest
         run: |
