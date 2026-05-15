@@ -1,10 +1,18 @@
-import { Editor, FileSystemAdapter, MarkdownFileInfo, MarkdownView, Notice, Plugin } from "obsidian";
+import {
+	Editor,
+	FileSystemAdapter,
+	MarkdownView,
+	Notice,
+	Plugin,
+	TFile,
+} from "obsidian";
 import {
 	AgenticNoteReferencesSettingTab,
 	DEFAULT_SETTINGS,
 	type AgenticNoteReferencesSettings,
 } from "./settings";
 import { buildCitation } from "./citation";
+import { RefModeSuggestModal, type RefModeItem } from "./ref-mode-modal";
 
 export default class AgenticNoteReferencesPlugin extends Plugin {
 	// Assigned in onload() via loadSettings(); definitely present before any
@@ -18,11 +26,22 @@ export default class AgenticNoteReferencesPlugin extends Plugin {
 		this.addCommand({
 			id: "copy-agentic-citation",
 			name: "Copy agentic citation",
-			// editorCallback is synchronous by Obsidian contract; the returned
-			// Promise is intentionally ignored — all errors are caught inside
-			// copyCitation and surfaced via Notice.
-			editorCallback: (editor: Editor, ctx: MarkdownView | MarkdownFileInfo) => {
-				void this.copyCitation(editor, ctx);
+			// Available whenever a Markdown view is open (editor or reading).
+			checkCallback: (checking: boolean) => {
+				const view =
+					this.app.workspace.getActiveViewOfType(MarkdownView);
+				if (!view) return false;
+
+				if (!checking) {
+					if (view.getMode() === "preview") {
+						// Reading mode: copy the note reference without line numbers.
+						void this.copyReadingCitation(view);
+					} else {
+						// Editor mode: let the user pick a ref mode.
+						this.showRefModeModal(view.editor, view);
+					}
+				}
+				return true;
 			},
 			hotkeys: [
 				{
@@ -39,25 +58,11 @@ export default class AgenticNoteReferencesPlugin extends Plugin {
 		console.log("Agentic Note References: unloaded");
 	}
 
-	async copyCitation(editor: Editor, ctx: MarkdownFileInfo) {
-		const file = ctx.file;
-		if (!file) {
-			new Notice("No active file.");
-			return;
-		}
-
-		const fromCursor = editor.getCursor("from");
-		const toCursor = editor.getCursor("to");
-
-		// Line numbers are 0-indexed; display as 1-indexed.
-		const fromLine = fromCursor.line + 1;
-		const toLine = toCursor.line + 1;
-
-		let filename: string;
+	/** Resolves the file display string according to the current pathFormat. */
+	private resolveFilename(file: TFile): string {
 		switch (this.settings.pathFormat) {
 			case "vaultRelative":
-				filename = file.path;
-				break;
+				return file.path;
 			case "absolute": {
 				const adapter = this.app.vault.adapter;
 				const basePath =
@@ -69,24 +74,77 @@ export default class AgenticNoteReferencesPlugin extends Plugin {
 						"Absolute path is unavailable on this platform — using vault-relative path.",
 					);
 				}
-				filename = basePath ? `${basePath}/${file.path}` : file.path;
-				break;
+				return basePath ? `${basePath}/${file.path}` : file.path;
 			}
 			case "filename":
 			default:
-				filename = file.basename;
-				break;
+				return file.basename;
+		}
+	}
+
+	/** Reading mode: directly copies the note reference (no line numbers). */
+	private async copyReadingCitation(view: MarkdownView): Promise<void> {
+		const file = view.file;
+		if (!file) {
+			new Notice("No active file.");
+			return;
 		}
 
-		const output = buildCitation(
-			this.settings.template,
+		const filename = this.resolveFilename(file);
+		const output = buildCitation(this.settings.readingModeTemplate, {
 			filename,
-			fromLine,
-			toLine,
-		);
+		});
 
+		await this.writeToClipboard(output);
+	}
+
+	/**
+	 * Editor mode: opens the ref-mode picker, then copies the citation built
+	 * from the chosen mode's template.
+	 */
+	private showRefModeModal(editor: Editor, view: MarkdownView): void {
+		const file = view.file;
+		if (!file) {
+			new Notice("No active file.");
+			return;
+		}
+
+		const filename = this.resolveFilename(file);
+		const fromLine = editor.getCursor("from").line + 1;
+		const toLine = editor.getCursor("to").line + 1;
+
+		const builtinModes: RefModeItem[] = [
+			{
+				name: "Reference Note",
+				template: "[[{{filename}}]]",
+			},
+			{
+				name: "Default",
+				template: this.settings.template,
+			},
+		];
+
+		const allModes: RefModeItem[] = [
+			...builtinModes,
+			...this.settings.customRefModes.map((m) => ({
+				name: m.name,
+				template: m.template,
+			})),
+		];
+
+		new RefModeSuggestModal(this.app, allModes, async (item) => {
+			const output = buildCitation(item.template, {
+				filename,
+				fromLine,
+				toLine,
+			});
+			await this.writeToClipboard(output);
+		}).open();
+	}
+
+	private async writeToClipboard(text: string): Promise<void> {
 		try {
-			await navigator.clipboard.writeText(output);
+			await navigator.clipboard.writeText(text);
 			new Notice("Agentic citation copied to clipboard.");
 		} catch (err) {
 			new Notice("Failed to copy citation to clipboard.");

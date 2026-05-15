@@ -4,46 +4,73 @@ An Obsidian plugin that copies a citation with file link, line numbers, and a cu
 
 ## How it works
 
-1. Select text in any note (or just place your cursor on a line).
-2. Press **Ctrl+I** (or run the command *Copy agentic citation* from the palette).
-3. The plugin copies a formatted citation to your clipboard, e.g.:
+### Editor mode
 
-   ```
-   [[My Note]] — Lines 47–52
+1. Place your cursor (or select a range) in any note.
+2. Press **Ctrl+Alt+I** (or run *Copy agentic citation* from the command palette).
+3. A picker appears listing all available ref modes:
 
-   Here is the referenced section:
-   ```
+   | Mode | What gets copied |
+   |------|-----------------|
+   | **Reference Note** | Just the file link, e.g. `[[My Note]]` |
+   | **Default** | File link + line range + prompt (configurable) |
+   | *Custom modes* | Whatever you define in Settings |
 
-   When only a single line is selected:
+4. Select a mode and the citation is copied to the clipboard.
 
-   ```
-   [[My Note]] — Line 5
+### Reading mode
 
-   Here is the referenced section:
-   ```
+Press **Ctrl+Alt+I** while in Reading mode. The note reference is copied directly — no picker, no line numbers:
 
-4. Paste it into your agent chat. The agent knows exactly which file and lines you mean.
+```
+[[My Note]]
+```
 
-## Customizing the citation
+The reading mode template is configurable in Settings.
 
-Go to **Settings → Agentic Note References** to edit the citation template and path format.
+## Settings
+
+Go to **Settings → Agentic Note References**.
 
 ### Path format
 
-Choose how the file is referenced in the citation:
+Applies to all modes and both reading/editor mode:
 
-- **File name only** (default) — e.g. `My Note`
-- **Relative to vault root** — e.g. `folder/My Note.md`
-- **Absolute filesystem path** — e.g. `/home/user/vault/folder/My Note.md`
+- **File name only** (default) — `My Note`
+- **Relative to vault root** — `folder/My Note.md`
+- **Absolute filesystem path** — `/home/user/vault/folder/My Note.md`
 
-### Template placeholders
+### Editor mode — Default citation template
 
-- `{{filename}}` — the file reference, according to your **Path format** setting
-- `{{from}}` — starting line number (1-indexed)
-- `{{to}}` — ending line number (1-indexed)
-- `{{lines}}` — human-friendly line range (e.g. `Line 5` or `Lines 47–52`)
+Template used by the built-in **Default** mode in the editor picker.
 
-Use `\n` for explicit newlines in the template.
+Default:
+```
+[[{{filename}}]] — Lines {{from}}–{{to}}
+
+Here is the referenced section:
+```
+
+### Reading mode template
+
+Template used when Ctrl+Alt+I is pressed in Reading mode.
+
+Default: `[[{{filename}}]]`
+
+### Custom ref modes
+
+Add as many ref modes as you like. Each mode has a **name** (shown in the picker) and a **template**.
+
+#### Template placeholders
+
+| Placeholder | Description | Available in |
+|-------------|-------------|-------------|
+| `{{filename}}` | File reference per path format | All modes |
+| `{{from}}` | Starting line number (1-indexed) | Editor mode only |
+| `{{to}}` | Ending line number (1-indexed) | Editor mode only |
+| `{{lines}}` | Human-friendly range, e.g. `Line 5` or `Lines 3–7` | Editor mode only |
+
+Use `\n` for explicit newlines in templates.
 
 ## Installation
 
